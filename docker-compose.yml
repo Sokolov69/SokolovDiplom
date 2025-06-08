@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+#  frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    ports:
+#      - "3000:80"
+#    depends_on:
+#      - backend
+#    environment:
+#      - REACT_APP_API_URL=http://localhost:8000/api
+#    volumes:
+#      - ./frontend:/app
+#      - /app/node_modules
+#    networks:
+#      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=backend.settings
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DB_ENGINE=${DB_ENGINE}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - USE_S3=${USE_S3}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_ENDPOINT_URL=${AWS_S3_ENDPOINT_URL}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME}
+      - AWS_S3_CUSTOM_DOMAIN=${AWS_S3_CUSTOM_DOMAIN}
+      - AWS_DEFAULT_ACL=${AWS_DEFAULT_ACL}
+      - AWS_S3_OBJECT_PARAMETERS=${AWS_S3_OBJECT_PARAMETERS}
+    volumes:
+      - ./backend:/app
+      - ./database:/app/database
+
+  app:
+    build:
+      context: ./mobile_app
+      dockerfile: Dockerfile
+    container_name: expo_app
+    volumes:
+      - ./mobile_app:/app
+      - /app/node_modules
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8081:8081"
+      - "19006:19006"
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+      - EXPO_DEBUG=true
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
+
+networks:
+  app-network:
+    driver: bridge 
